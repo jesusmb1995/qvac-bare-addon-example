@@ -71,6 +71,11 @@ public:
   std::any process(const std::any &input) override {
     const auto &features = std::any_cast<const std::vector<double> &>(input);
     size_t d = (params_.size() - 1) / 3;
+    if (features.size() != d) {
+      throw std::runtime_error(
+          "expected " + std::to_string(d) + " features, got " +
+          std::to_string(features.size()));
+    }
     std::span<const double> mean(params_.data() + d + 1, d);
     std::span<const double> stdev(params_.data() + 2 * d + 1, d);
 
