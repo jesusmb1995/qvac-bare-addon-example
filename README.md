@@ -135,8 +135,8 @@ public:
   }
 
   static std::vector<double> train(const std::vector<std::vector<double>> &X,
-                                 const std::vector<double> &y,
-                                 int maxIter = 1000, double lr = 0.1) {
+                                   const std::vector<double> &y,
+                                   int maxIter = 1000, double lr = 0.1) {
     // Gradient descent — returns [bias, w1, ..., wd, mu1, ..., mud, sd1, ..., sdd]
     // ... implementation details ...
   }
@@ -321,13 +321,25 @@ bare example.js
 Expected output:
 
 ```
-Training on 50000 samples x 2 features...
+=== Binary Classifier Addon Example ===
 
-student would buy? no
-senior_executive would buy? yes
+Loading dataset: 50000 samples, 2 features (age, income)
+Training logistic regression via native C++ addon (gradient descent, 1000 iterations)...
+Training complete in <N>ms — learned 7 parameters
+
+Creating classifier instance with trained weights...
+Running predictions (non-blocking, executed on C++ background thread):
+
+  Student        (age: 21, income: $12,000)  → probability: 0.0000 → would NOT buy
+  Senior exec    (age: 55, income: $130,000) → probability: 1.0000 → WOULD buy
+  Mid-career     (age: 35, income: $55,000)  → probability: 0.3587 → would NOT buy
+  Retiree        (age: 65, income: $80,000)  → probability: 0.3498 → would NOT buy
+
+Destroying native instance (freeing C++ memory)...
+Done.
 ```
 
-The example loads synthetic `[age, income]` samples from `dataset.json`, trains logistic regression via gradient descent, and predicts whether two new people would make a purchase. The broke student (age 21, income $12k) is predicted as "no", the senior executive (age 55, income $130k) as "yes".
+The example loads synthetic `[age, income]` samples from `dataset.json`, trains logistic regression via gradient descent, and predicts whether four people would make a purchase. Predictions near the decision boundary (mid-career, retiree) show how the model handles ambiguous cases.
 
 To measure the real-world benefit of a native addon, the repo includes a pure JavaScript implementation of the same logistic regression algorithm (`pure_js_example_comparison.js`). Both versions train on an identical dataset loaded from `dataset.json`.
 
