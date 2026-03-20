@@ -98,8 +98,8 @@ public:
   /// Normalizes X internally. Returns [bias, w1, ..., wd, mu1, ..., mud, sd1,
   /// ..., sdd].
   static std::vector<double> train(const std::vector<std::vector<double>> &X,
-                                 const std::vector<double> &y,
-                                 int maxIter = 1000, double lr = 0.1) {
+                                   const std::vector<double> &y,
+                                   int maxIter = 1000, double lr = 0.1) {
     if (X.empty() || y.empty()) {
       throw std::invalid_argument("X and y must not be empty");
     }
