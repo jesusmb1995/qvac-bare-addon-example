@@ -72,8 +72,8 @@ JSCATCH
 /// Trains logistic regression on provided data. Standalone function
 /// (no instance needed). Returns weights as Float64Array.
 ///
-/// JS signature: fit(X: Float64Array[], y: Float64Array) -> Float64Array
-inline js_value_t *fit(js_env_t *env, js_callback_info_t *info) try {
+/// JS signature: train(X: Float64Array[], y: Float64Array) -> Float64Array
+inline js_value_t *train(js_env_t *env, js_callback_info_t *info) try {
   using namespace qvac_lib_inference_addon_cpp;
 
   JsArgsParser args(env, info);
@@ -90,7 +90,7 @@ inline js_value_t *fit(js_env_t *env, js_callback_info_t *info) try {
   auto y = js::TypedArray<double>(env, args.get(1, "y"))
                .as<std::vector<double>>(env);
 
-  auto weights = LogisticRegression::fit(X, y);
+  auto weights = LogisticRegression::train(X, y);
 
   std::span<const double> weightsSpan(weights.data(), weights.size());
   return js::TypedArray<double>::create(env, weightsSpan);

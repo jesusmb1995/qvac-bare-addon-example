@@ -2,7 +2,7 @@ function sigmoid (z) {
   return 1.0 / (1.0 + Math.exp(-z))
 }
 
-function fit (X, y, maxIter = 1000, lr = 0.1) {
+function train (X, y, maxIter = 1000, lr = 0.1) {
   const n = X.length
   const d = X[0].length
 
@@ -60,12 +60,29 @@ function predict (params, features) {
 }
 
 const { X, y } = require('./dataset.json')
-console.log(`Training on ${X.length} samples x ${X[0].length} features...\n`)
 
-const params = fit(X, y)
+console.log('=== Pure JS Classifier (comparison baseline) ===\n')
+
+console.log(`Loading dataset: ${X.length} samples, ${X[0].length} features (age, income)`)
+
+console.log('Training logistic regression in pure JavaScript (gradient descent, 1000 iterations)...')
+const t0 = Date.now()
+const params = train(X, y)
+const elapsed = Date.now() - t0
+console.log(`Training complete in ${elapsed}ms — learned ${params.length} parameters\n`)
+
+console.log('Running predictions:\n')
 
 const student = predict(params, [21, 12000])
-console.log('student would buy?', student >= 0.5 ? 'yes' : 'no')
+console.log(`  Student        (age: 21, income: $12,000)  → probability: ${student.toFixed(4)} → ${student >= 0.5 ? 'WOULD buy' : 'would NOT buy'}`)
 
-const senior_executive = predict(params, [55, 130000])
-console.log('senior_executive would buy?', senior_executive >= 0.5 ? 'yes' : 'no')
+const senior = predict(params, [55, 130000])
+console.log(`  Senior exec    (age: 55, income: $130,000) → probability: ${senior.toFixed(4)} → ${senior >= 0.5 ? 'WOULD buy' : 'would NOT buy'}`)
+
+const midCareer = predict(params, [35, 55000])
+console.log(`  Mid-career     (age: 35, income: $55,000)  → probability: ${midCareer.toFixed(4)} → ${midCareer >= 0.5 ? 'WOULD buy' : 'would NOT buy'}`)
+
+const retiree = predict(params, [65, 80000])
+console.log(`  Retiree        (age: 65, income: $80,000)  → probability: ${retiree.toFixed(4)} → ${retiree >= 0.5 ? 'WOULD buy' : 'would NOT buy'}`)
+
+console.log('\nDone.')

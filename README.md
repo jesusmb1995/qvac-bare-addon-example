@@ -25,7 +25,7 @@ For an AI addon, three operations form the minimal surface area:
 | `destroyInstance` | Free memory, tear down threads |
 
 
-A fourth operation, `fit`, is specific to our example — it trains the logistic regression model and returns the learned weights. In a production addon backed by a large model you would load pre-trained weights instead.
+A fourth operation, `train`, is specific to our example — it trains the logistic regression model and returns the learned weights. In a production addon backed by a large model you would load pre-trained weights instead.
 
 ## Setting Up the Build
 
@@ -67,7 +67,7 @@ classifierAddonExports(js_env_t* env, js_value_t* exports) {
 
   V("createInstance", classifier_addon::createInstance)
   V("runJob", classifier_addon::runJob)
-  V("fit", classifier_addon::fit)
+  V("train", classifier_addon::train)
   V("destroyInstance",
     qvac_lib_inference_addon_cpp::JsInterface::destroyInstance)
 
@@ -87,7 +87,7 @@ const binding = require.addon()
 // Example usage
 const handle = binding.createInstance(this, new Float64Array(weights), onOutputCb)
 binding.runJob(handle, new Float64Array(features))
-binding.fit(xArrays, yArray)
+binding.train(xArrays, yArray)
 binding.destroyInstance(handle)
 ```
 
@@ -102,7 +102,7 @@ With the library in place, your addon-specific code reduces to:
 1. **A model class** implementing `IModel` (just `getName()`, `process()`, and `runtimeStats()`)
 2. **A `createInstance` function** that parses config, constructs the model, and composes it into an `AddonJs`
 3. **A `runJob` function** that parses input and forwards it to `IModel::process`
-4. **Any custom methods** (like `fit` in our example)
+4. **Any custom methods** (like `train` in our example)
 
 Everything else — `destroyInstance`, instance tracking, thread management, JS↔C++ error handling — is taken care of.
 
@@ -134,9 +134,9 @@ public:
     return sigmoid(z); // probability as double
   }
 
-  static std::vector<double> fit(const std::vector<std::vector<double>> &X,
-                                 const std::vector<double> &y,
-                                 int maxIter = 1000, double lr = 0.1) {
+  static std::vector<double> train(const std::vector<std::vector<double>> &X,
+                                   const std::vector<double> &y,
+                                   int maxIter = 1000, double lr = 0.1) {
     // Gradient descent — returns [bias, w1, ..., wd, mu1, ..., mud, sd1, ..., sdd]
     // ... implementation details ...
   }
@@ -211,7 +211,7 @@ inline js_value_t *runJob(js_env_t *env, js_callback_info_t *info) try {
 JSCATCH
 ```
 
-The [`fit` bridge](https://github.com/jesusmb1995/qvac-bare-addon-example/blob/main/addon/AddonJs.hpp) follows the same argument-parsing pattern but doesn't need to retrieve an instance — it calls `LogisticRegression::fit` directly and returns the weights as a typed array.
+The [`train` bridge](https://github.com/jesusmb1995/qvac-bare-addon-example/blob/main/addon/AddonJs.hpp) follows the same argument-parsing pattern but doesn't need to retrieve an instance — it calls `LogisticRegression::train` directly and returns the weights as a typed array.
 
 > **Tip — Accessing your concrete model from a bridge function**
 >
@@ -228,7 +228,7 @@ On the JS side we wrap the raw binding in a `ClassifierInterface` class that pro
 
 - `constructor(params)` — calls `binding.createInstance`, stores the handle, and binds the output callback
 - `predict(features)` — returns a Promise, calls `binding.runJob` under the hood
-- `static fit(X, y)` — calls `binding.fit` directly and returns the learned weights
+- `static train(X, y)` — calls `binding.train` directly and returns the learned weights
 - `destroy()` — calls `binding.destroyInstance` to free the native instance
 
 The callback passed to `createInstance` receives four arguments:
@@ -321,13 +321,25 @@ bare example.js
 Expected output:
 
 ```
-Training on 50000 samples x 2 features...
+=== Binary Classifier Addon Example ===
 
-student would buy? no
-senior_executive would buy? yes
+Loading dataset: 50000 samples, 2 features (age, income)
+Training logistic regression via native C++ addon (gradient descent, 1000 iterations)...
+Training complete in <N>ms — learned 7 parameters
+
+Creating classifier instance with trained weights...
+Running predictions (non-blocking, executed on C++ background thread):
+
+  Student        (age: 21, income: $12,000)  → probability: 0.0000 → would NOT buy
+  Senior exec    (age: 55, income: $130,000) → probability: 1.0000 → WOULD buy
+  Mid-career     (age: 35, income: $55,000)  → probability: 0.3587 → would NOT buy
+  Retiree        (age: 65, income: $80,000)  → probability: 0.3498 → would NOT buy
+
+Destroying native instance (freeing C++ memory)...
+Done.
 ```
 
-The example loads synthetic `[age, income]` samples from `dataset.json`, trains logistic regression via gradient descent, and predicts whether two new people would make a purchase. The broke student (age 21, income $12k) is predicted as "no", the senior executive (age 55, income $130k) as "yes".
+The example loads synthetic `[age, income]` samples from `dataset.json`, trains logistic regression via gradient descent, and predicts whether four people would make a purchase. Predictions near the decision boundary (mid-career, retiree) show how the model handles ambiguous cases.
 
 To measure the real-world benefit of a native addon, the repo includes a pure JavaScript implementation of the same logistic regression algorithm (`pure_js_example_comparison.js`). Both versions train on an identical dataset loaded from `dataset.json`.
 
@@ -350,7 +362,7 @@ Summary
     2.18 ± 0.10 times faster than node pure_js_example_comparison.js
 ```
 
-The pure JS version is a single self-contained file that implements the same gradient-descent `fit` and sigmoid `predict` — no native code, no build step. The ~2× gap is consistent in this setup, but exact speedups vary by hardware, dataset size, and runtime versions. In this example, the runtime difference between Bare and Node is comparatively small; most of the gap appears to come from native C++ computation versus interpreted code.
+The pure JS version is a single self-contained file that implements the same gradient-descent `train` and sigmoid `predict` — no native code, no build step. The ~2× gap is consistent in this setup, but exact speedups vary by hardware, dataset size, and runtime versions. In this example, the runtime difference between Bare and Node is comparatively small; most of the gap appears to come from native C++ computation versus interpreted code.
 
 > **If you hit `ADDON_NOT_FOUND`** — the shared library isn't where `require.addon()` expects it. Verify `bare-make install` succeeded and that `prebuilds/<platform>-<arch>/` contains the built file. When cross-compiling, double-check the `--platform` and `--arch` flags. If the build cache seems stale, delete `build/` and re-run `npm run build`. For other runtime issues see the [Bare troubleshooting guide](https://docs.pears.com/reference/troubleshooting.html).
 
@@ -374,7 +386,7 @@ Our classifier ships as a single shared library, but a production addon may need
 
 You now know how to build a native AI addon for the Bare JavaScript runtime. The pattern is:
 
-1. C++ side: **Implement `IModel`** — write `process()` for inference, optionally `fit()` for training
+1. C++ side: **Implement `IModel`** — write `process()` for inference, optionally `train()` for training
 2. Bridge: **Wire the bindings** — parse JS arguments, construct the model, register output handlers
 3. JS side:  **Wrap in JavaScript** — expose a Promise-based API that your application code can consume
 

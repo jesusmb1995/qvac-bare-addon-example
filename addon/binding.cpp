@@ -19,7 +19,7 @@ classifierAddonExports(js_env_t* env, js_value_t* exports) {
 
   V("createInstance", classifier_addon::createInstance)
   V("runJob", classifier_addon::runJob)
-  V("fit", classifier_addon::fit)
+  V("train", classifier_addon::train)
   V("destroyInstance",
     qvac_lib_inference_addon_cpp::JsInterface::destroyInstance)
 
