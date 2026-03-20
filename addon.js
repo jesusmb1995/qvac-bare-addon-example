@@ -73,6 +73,7 @@ class ClassifierInterface {
   }
 
   destroy () {
+    this._settle(null, new Error('Instance destroyed'))
     if (this._handle) {
       binding.destroyInstance(this._handle)
       this._handle = null
