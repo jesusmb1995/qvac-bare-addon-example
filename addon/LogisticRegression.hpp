@@ -12,7 +12,7 @@
 namespace classifier_addon {
 
 class LogisticRegression : public qvac_lib_inference_addon_cpp::model::IModel {
-  /// Model parameters produced by fit():
+  /// Model parameters produced by train():
   /// [bias, w1, ..., wd, mu1, ..., mud, sd1, ..., sdd]
   /// where d is the number of features, mu is per-feature mean,
   /// and sd is per-feature standard deviation used for normalization.
@@ -84,7 +84,7 @@ public:
   /// Train logistic regression via gradient descent.
   /// Normalizes X internally. Returns [bias, w1, ..., wd, mu1, ..., mud, sd1,
   /// ..., sdd].
-  static std::vector<double> fit(const std::vector<std::vector<double>> &X,
+  static std::vector<double> train(const std::vector<std::vector<double>> &X,
                                  const std::vector<double> &y,
                                  int maxIter = 1000, double lr = 0.1) {
     auto Xn = X;

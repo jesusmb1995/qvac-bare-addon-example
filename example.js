@@ -4,7 +4,7 @@ const { X, y } = require('./dataset.json')
 async function main () {
   console.log(`Training on ${X.length} samples x ${X[0].length} features...\n`)
 
-  const params = ClassifierInterface.fit(X, y)
+  const params = ClassifierInterface.train(X, y)
   const classifier = new ClassifierInterface(params)
 
   const student = await classifier.predict([21, 12000])

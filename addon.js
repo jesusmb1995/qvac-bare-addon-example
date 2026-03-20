@@ -1,7 +1,7 @@
 /** JS interface for the binary classifier bare addon.
  *
  * Wraps the native C++ binding and provides a Promise-based predict() API.
- * Training is exposed as a standalone fit() function that returns weights
+ * Training is exposed as a standalone train() function that returns weights
  * suitable for constructing a new ClassifierInterface instance.
  */
 const binding = require.addon()
@@ -79,10 +79,10 @@ class ClassifierInterface {
     }
   }
 
-  static fit (X, y) {
+  static train (X, y) {
     const xArrays = X.map(row => new Float64Array(row))
     const yArray = new Float64Array(y)
-    return Array.from(binding.fit(xArrays, yArray))
+    return Array.from(binding.train(xArrays, yArray))
   }
 }
 

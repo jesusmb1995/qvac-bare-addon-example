@@ -2,7 +2,7 @@ function sigmoid (z) {
   return 1.0 / (1.0 + Math.exp(-z))
 }
 
-function fit (X, y, maxIter = 1000, lr = 0.1) {
+function train (X, y, maxIter = 1000, lr = 0.1) {
   const n = X.length
   const d = X[0].length
 
@@ -62,7 +62,7 @@ function predict (params, features) {
 const { X, y } = require('./dataset.json')
 console.log(`Training on ${X.length} samples x ${X[0].length} features...\n`)
 
-const params = fit(X, y)
+const params = train(X, y)
 
 const student = predict(params, [21, 12000])
 console.log('student would buy?', student >= 0.5 ? 'yes' : 'no')
