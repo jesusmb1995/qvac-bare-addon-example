@@ -1,5 +1,5 @@
-const fs = require('fs')
-const path = require('path')
+const fs = require('bare-fs')
+const path = require('bare-path')
 
 // Deterministic PRNG (mulberry32) so the dataset is reproducible
 function mulberry32 (seed) {
