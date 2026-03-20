@@ -61,7 +61,7 @@ public:
   /// Predict: input is std::vector<double> features (raw, unnormalized).
   /// Normalizes using stored mean/stddev, returns probability as double.
   std::any process(const std::any &input) override {
-    auto features = std::any_cast<std::vector<double>>(input);
+    const auto &features = std::any_cast<const std::vector<double> &>(input);
     size_t d = (params_.size() - 1) / 3;
     std::span<const double> mean(params_.data() + d + 1, d);
     std::span<const double> stdev(params_.data() + 2 * d + 1, d);

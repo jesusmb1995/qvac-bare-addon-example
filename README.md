@@ -127,7 +127,7 @@ public:
       : params_(std::move(params)) {}
 
   std::any process(const std::any &input) override {
-    auto features = std::any_cast<std::vector<double>>(input);
+    const auto &features = std::any_cast<const std::vector<double> &>(input);
 
     // ... normalize features using stored mean/stddev, compute sigmoid ...
 
