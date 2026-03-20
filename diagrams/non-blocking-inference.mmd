@@ -1,0 +1,35 @@
+%%{init: {'theme': 'base', 'themeVariables': {
+  'background': '#0D1117',
+  'primaryColor': '#16E3C1',
+  'primaryBorderColor': '#16E3C1',
+  'primaryTextColor': '#ffffff',
+  'lineColor': '#16E3C1',
+  'textColor': '#d0d0d0',
+  'mainBkg': '#0D1117',
+  'noteBkgColor': '#1B2332',
+  'noteBorderColor': '#C84695',
+  'noteTextColor': '#ffffff',
+  'actorBkg': '#131B27',
+  'actorBorder': '#16E3C1',
+  'actorTextColor': '#16E3C1',
+  'actorLineColor': '#2A3A50',
+  'signalColor': '#16E3C1',
+  'signalTextColor': '#d0d0d0',
+  'labelBoxBkgColor': '#131B27',
+  'labelBoxBorderColor': '#16E3C1',
+  'labelTextColor': '#ffffff',
+  'activationBkgColor': '#1B2332',
+  'activationBorderColor': '#16E3C1',
+  'sequenceNumberColor': '#ffffff'
+}}}%%
+sequenceDiagram
+    participant JS as JS thread
+    participant CPP as C++ background thread
+
+    JS->>CPP: runJob(input) – enqueue job
+    Note left of JS: returns immediately
+    JS->>JS: JS continues
+    CPP->>CPP: process(input)
+    Note right of CPP: runs inference
+    CPP-->>JS: push result – event loop picks up
+    JS->>JS: outputCallback(result)
