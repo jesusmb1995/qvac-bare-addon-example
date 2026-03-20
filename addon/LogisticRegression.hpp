@@ -1,6 +1,7 @@
 #pragma once
 
 #include <any>
+#include <atomic>
 #include <cmath>
 #include <span>
 #include <string>
@@ -17,7 +18,7 @@ class LogisticRegression : public qvac_lib_inference_addon_cpp::model::IModel {
   /// where d is the number of features, mu is per-feature mean,
   /// and sd is per-feature standard deviation used for normalization.
   std::vector<double> params_;
-  int64_t predict_count_ = 0;
+  std::atomic<int64_t> predict_count_{0};
 
   static double sigmoid(double z) { return 1.0 / (1.0 + std::exp(-z)); }
 
