@@ -5,8 +5,7 @@
   "addon": true,
   "scripts": {
     "build": "bare-make generate && bare-make build && bare-make install",
-    "example": "bare example.js",
-    "test": "bare test/test-classifier.js"
+    "example": "bare example.js"
   },
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^11.12.0",
