@@ -4,6 +4,7 @@
 #include <atomic>
 #include <cmath>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -53,7 +54,13 @@ class LogisticRegression : public qvac_lib_inference_addon_cpp::model::IModel {
 
 public:
   explicit LogisticRegression(std::vector<double> params)
-      : params_(std::move(params)) {}
+      : params_(std::move(params)) {
+    if (params_.size() < 4 || (params_.size() - 1) % 3 != 0) {
+      throw std::invalid_argument(
+          "params must have 1+3*d elements "
+          "[bias, weights..., means..., stddevs...]");
+    }
+  }
 
   [[nodiscard]] std::string getName() const override {
     return "LogisticRegression";
