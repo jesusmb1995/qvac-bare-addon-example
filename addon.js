@@ -4,6 +4,8 @@
  * Training is exposed as a standalone train() function that returns weights
  * suitable for constructing a new ClassifierInterface instance.
  */
+const { exclusiveRunQueue } = require('@qvac/infer-base')
+
 const binding = require.addon()
 const DEBUG = false
 
@@ -12,6 +14,7 @@ class ClassifierInterface {
     this._result = null
     this._resolve = null
     this._reject = null
+    this._run = exclusiveRunQueue()
 
     this._handle = binding.createInstance(
       this,
@@ -45,7 +48,7 @@ class ClassifierInterface {
   }
 
   predict (features) {
-    return this._withExclusiveRun(() => {
+    return this._run(() => {
       return new Promise((resolve, reject) => {
         this._resolve = resolve
         this._reject = reject
@@ -58,18 +61,6 @@ class ClassifierInterface {
         }
       })
     })
-  }
-
-  async _withExclusiveRun (fn) {
-    const prev = this._runQueue || Promise.resolve()
-    let release
-    this._runQueue = new Promise(resolve => { release = resolve })
-    await prev
-    try {
-      return await fn()
-    } finally {
-      release()
-    }
   }
 
   destroy () {
