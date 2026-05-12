@@ -5,8 +5,7 @@ find_package(cmake-vcpkg REQUIRED PATHS node_modules/cmake-vcpkg)
 
 project(classifier-addon C CXX)
 
-find_path(QVAC_LIB_INFERENCE_ADDON_CPP_INCLUDE_DIRS
-  "qvac-lib-inference-addon-cpp/JsInterface.hpp")
+find_path(QVAC_LIB_INFERENCE_ADDON_CPP_INCLUDE_DIRS "inference-addon-cpp/JsInterface.hpp")
 
 add_bare_module(classifier-addon)
 
